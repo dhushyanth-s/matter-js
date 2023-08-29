@@ -22,7 +22,8 @@ Example.restitution = function() {
             height: 600,
             showAngleIndicator: true,
             showCollisions: true,
-            showVelocity: true
+            showVelocity: true,
+						devicePixelRatio: 100
         }
     });
 
@@ -32,21 +33,21 @@ Example.restitution = function() {
     var runner = Runner.create();
     Runner.run(runner, engine);
 
+		console.log(render)
+
     // add bodies
     var rest = 0.9, 
         space = 600 / 5;
     
     Composite.add(world, [
-        Bodies.rectangle(100 + space * 0, 150, 50, 50, { restitution: rest }),
-        Bodies.rectangle(100 + space * 1, 150, 50, 50, { restitution: rest, angle: -Math.PI * 0.15 }),
-        Bodies.rectangle(100 + space * 2, 150, 50, 50, { restitution: rest, angle: -Math.PI * 0.25 }),
-        Bodies.circle(100 + space * 3, 150, 25, { restitution: rest }),
-        Bodies.rectangle(100 + space * 5, 150, 180, 20, { restitution: rest, angle: -Math.PI * 0.5 }),
+        Bodies.rectangle(100 + space * 0, 500, 50, 50, { restitution: 1, friction: 0, frictionStatic: 0, frictionAir: 0, inertia: Infinity }),
+        Bodies.rectangle(100 + space * 1.5, 300, 50, 50, { restitution: 1, friction: 0, frictionStatic: 0, frictionAir: 0, inertia: Infinity }),
+        Bodies.rectangle(100 + space * 3, 100, 50, 50, { restitution: 1, friction: 0, frictionStatic: 0, frictionAir: 0, inertia: Infinity }),
         // walls
-        Bodies.rectangle(400, 0, 800, 50, { isStatic: true }),
-        Bodies.rectangle(400, 600, 800, 50, { isStatic: true }),
-        Bodies.rectangle(800, 300, 50, 600, { isStatic: true }),
-        Bodies.rectangle(0, 300, 50, 600, { isStatic: true })
+        Bodies.rectangle(400, 0, 800, 50, { isStatic: true, restitution: 1 }),
+        Bodies.rectangle(400, 600, 800, 50, { isStatic: true, restitution: 1 }),
+        Bodies.rectangle(800, 300, 50, 600, { isStatic: true, restitution: 1 }),
+        Bodies.rectangle(0, 300, 50, 600, { isStatic: true, restitution: 1 })
     ]);
 
     // add mouse control

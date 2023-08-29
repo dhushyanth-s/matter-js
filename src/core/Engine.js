@@ -119,66 +119,81 @@ var Body = require('../body/Body');
         // update sleeping if enabled
         if (engine.enableSleeping)
             Sleeping.update(allBodies, delta);
-
-        // apply gravity to all bodies
         Engine._bodiesApplyGravity(allBodies, engine.gravity);
+        var deltaIterations = engine.deltaIterations || 100;
 
-        // update all body position and rotation by integration
-        if (delta > 0) {
-            Engine._bodiesUpdate(allBodies, delta);
-        }
+        for (var iter = 0; iter < deltaIterations; iter++) {
+            var deltaDivision = delta / deltaIterations;
+            if (delta > 0) {
+                Engine._bodiesUpdate(allBodies, deltaDivision);
+            }
+            Events.trigger(engine, "beforeSolve", event);
+            if (!iter) {
+                Constraint.preSolveAll(allBodies);
+            }
+            for (i = 0; i < engine.constraintIterations; i++) {
+                Constraint.solveAll(allConstraints, deltaDivision, deltaDivision);
+            }
+            // }
+            // apply gravity to all bodies
 
-        Events.trigger(engine, 'beforeSolve', event);
+            // update all body position and rotation by integration
+            // if (delta > 0) {
+            //     Engine._bodiesUpdate(allBodies, delta);
+            // }
 
-        // update all constraints (first pass)
-        Constraint.preSolveAll(allBodies);
-        for (i = 0; i < engine.constraintIterations; i++) {
-            Constraint.solveAll(allConstraints, delta);
-        }
-        Constraint.postSolveAll(allBodies);
+            // Events.trigger(engine, 'beforeSolve', event);
 
-        // find all collisions
-        detector.pairs = engine.pairs;
-        var collisions = Detector.collisions(detector);
+            // update all constraints (first pass)
+            // Constraint.preSolveAll(allBodies);
+            // for (i = 0; i < engine.constraintIterations; i++) {
+            //     Constraint.solveAll(allConstraints, delta);
+            // }
+            Constraint.postSolveAll(allBodies);
 
-        // update collision pairs
-        Pairs.update(pairs, collisions, timestamp);
+            // find all collisions
+            detector.pairs = engine.pairs;
+            var collisions = Detector.collisions(detector);
 
-        // wake up bodies involved in collisions
-        if (engine.enableSleeping)
-            Sleeping.afterCollisions(pairs.list);
+            // update collision pairs
+            Pairs.update(pairs, collisions, timestamp);
 
-        // trigger collision events
-        if (pairs.collisionStart.length > 0) {
-            Events.trigger(engine, 'collisionStart', { 
-                pairs: pairs.collisionStart,
-                timestamp: timing.timestamp,
-                delta: delta
-            });
-        }
+            // wake up bodies involved in collisions
+            if (engine.enableSleeping)
+                Sleeping.afterCollisions(pairs.list);
 
-        // iteratively resolve position between collisions
-        var positionDamping = Common.clamp(20 / engine.positionIterations, 0, 1);
+            // trigger collision events
+            if (pairs.collisionStart.length > 0) {
+                Events.trigger(engine, 'collisionStart', { 
+                    pairs: pairs.collisionStart,
+                    timestamp: timing.timestamp,
+                    delta: delta
+                });
+            }
+
+            // iteratively resolve position between collisions
+            var positionDamping = Common.clamp(20 / engine.positionIterations, 0, 1);
         
-        Resolver.preSolvePosition(pairs.list);
-        for (i = 0; i < engine.positionIterations; i++) {
-            Resolver.solvePosition(pairs.list, delta, positionDamping);
-        }
-        Resolver.postSolvePosition(allBodies);
+            Resolver.preSolvePosition(pairs.list);
+            for (i = 0; i < engine.positionIterations; i++) {
+                // Resolver.solvePosition(pairs.list, delta, positionDamping);
+                Resolver.solvePosition(pairs.list, deltaDivision, positionDamping);
+            }
+            Resolver.postSolvePosition(allBodies);
 
-        // update all constraints (second pass)
-        Constraint.preSolveAll(allBodies);
-        for (i = 0; i < engine.constraintIterations; i++) {
-            Constraint.solveAll(allConstraints, delta);
-        }
-        Constraint.postSolveAll(allBodies);
+            // update all constraints (second pass)
+            Constraint.preSolveAll(allBodies);
+            for (i = 0; i < engine.constraintIterations; i++) {
+                Constraint.solveAll(allConstraints, deltaDivision, deltaDivision);
+            }
+            Constraint.postSolveAll(allBodies);
 
-        // iteratively resolve velocity between collisions
-        Resolver.preSolveVelocity(pairs.list);
-        for (i = 0; i < engine.velocityIterations; i++) {
-            Resolver.solveVelocity(pairs.list, delta);
+            // iteratively resolve velocity between collisions
+            Resolver.preSolveVelocity(pairs.list);
+            for (i = 0; i < engine.velocityIterations; i++) {
+                Resolver.solveVelocity(pairs.list, deltaDivision);
+            }
         }
-
         // update body speed and velocity properties
         Engine._bodiesUpdateVelocities(allBodies);
 

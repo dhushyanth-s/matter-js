@@ -31,14 +31,17 @@ Example.newtonsCradle = function() {
     var runner = Runner.create();
     Runner.run(runner, engine);
 
+    // var ctx = runner.context;
+    console.log(runner);
+
     // see newtonsCradle function defined later in this file
-    var cradle = Example.newtonsCradle.newtonsCradle(280, 100, 5, 30, 200);
+    var cradle = Example.newtonsCradle.newtonsCradle(280, 250, 1, 30, 200);
     Composite.add(world, cradle);
     Body.translate(cradle.bodies[0], { x: -180, y: -100 });
     
-    cradle = Example.newtonsCradle.newtonsCradle(280, 380, 7, 20, 140);
-    Composite.add(world, cradle);
-    Body.translate(cradle.bodies[0], { x: -140, y: -100 });
+    // cradle = Example.newtonsCradle.newtonsCradle(280, 380, 7, 20, 140);
+    // Composite.add(world, cradle);
+    // Body.translate(cradle.bodies[0], { x: -140, y: -100 });
 
     // add mouse control
     var mouse = Mouse.create(render.canvas),
@@ -99,7 +102,7 @@ Example.newtonsCradle.newtonsCradle = function(xx, yy, number, size, length) {
     for (var i = 0; i < number; i++) {
         var separation = 1.9,
             circle = Bodies.circle(xx + i * (size * separation), yy + length, size, 
-                { inertia: Infinity, restitution: 1, friction: 0, frictionAir: 0, slop: size * 0.02 }),
+                { inertia: Infinity, restitution: 1, friction: 0, frictionAir: 0, slop: size * 0.02, timeScale: 1 }),
             constraint = Constraint.create({ pointA: { x: xx + i * (size * separation), y: yy }, bodyB: circle });
 
         Composite.addBody(newtonsCradle, circle);

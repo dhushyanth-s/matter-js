@@ -533,7 +533,9 @@ var Mouse = require('../core/Mouse');
             x += width;
         }
     };
-
+    var startingY = [500, 300, 100];
+    var maxY1 = 0, maxY2 = 0, maxY3 = 0;
+    var tempMaxY1 = 0, tempMaxY2 = 0, tempMaxY3 = 0;
     /**
      * Renders engine and render performance information.
      * @private
@@ -565,6 +567,8 @@ var Mouse = require('../core/Mouse');
             height = 34,
             x = 10,
             y = 69;
+
+        
 
         // background
         context.fillStyle = '#0e0f19';
@@ -609,6 +613,67 @@ var Mouse = require('../core/Mouse');
             rateMean * rateMean * rateMean,
             function(i) { return (((timestampElapsedHistory[i] / deltaHistory[i]) / rateMean) || 0) - 1; }
         );
+
+        var world = engine.world;
+        var bodies = Composite.allBodies(world);
+        if (bodies[0] && bodies[1] && bodies[2]) {
+            if (Math.abs(bodies[0].speed) < 0.1) {
+                tempMaxY1 = Math.min(bodies[0].position.y, tempMaxY1);
+            } else {
+                if (tempMaxY1 !== 10000) {
+
+                    maxY1 = tempMaxY1;
+                }
+                tempMaxY1 = 10000;
+            }
+						if (Math.abs(bodies[1].speed) < 0.1) {
+							tempMaxY2 = Math.min(bodies[1].position.y, tempMaxY2);
+					} else {
+							if (tempMaxY2 !== 10000) {
+
+									maxY2 = tempMaxY2;
+							}
+							tempMaxY2 = 10000;
+					}
+					if (Math.abs(bodies[2].speed) < 0.1) {
+						tempMaxY3 = Math.min(bodies[2].position.y, tempMaxY3);
+				} else {
+						if (tempMaxY3 !== 10000) {
+
+								maxY3 = tempMaxY3;
+						}
+						tempMaxY3 = 10000;
+				}
+					
+            // leastY = Math.min(bodies[0].position.y, leastY).toFixed(1)
+            Render.status(
+                context, x + (gap + width) * 5, y, width, graphHeight, timestampElapsedHistory.length, 
+                `${((maxY1 - 500) / 1).toFixed(2)} %`,
+                rateMean * rateMean * rateMean,
+                function(i) { return (((timestampElapsedHistory[i] / deltaHistory[i]) / rateMean) || 0) - 1; }
+            );
+						Render.status(
+							context, x + (gap + width) * 6, y, width, graphHeight, timestampElapsedHistory.length, 
+							`${((maxY2 - 300) / 3).toFixed(2)} %`,
+							rateMean * rateMean * rateMean,
+							function(i) { return (((timestampElapsedHistory[i] / deltaHistory[i]) / rateMean) || 0) - 1; }
+					);
+					Render.status(
+						context, x + (gap + width) * 7, y, width, graphHeight, timestampElapsedHistory.length, 
+						`${((maxY3 - 100) / 6).toFixed(2)} %`,
+						rateMean * rateMean * rateMean,
+						function(i) { return (((timestampElapsedHistory[i] / deltaHistory[i]) / rateMean) || 0) - 1; }
+				);
+            // leastY = Math.min(bodies[0].position.y, leastY).toFixed(1)
+            // Render.status(
+            //     context, x + (gap + width) * 9, y, width * 2, graphHeight, timestampElapsedHistory.length, 
+            //     diff, 
+            //     rateMean * rateMean * rateMean,
+            //     function(i) { return (((timestampElapsedHistory[i] / deltaHistory[i]) / rateMean) || 0) - 1; }
+            // );
+        }
+
+        
     };
 
     /**

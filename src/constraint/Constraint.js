@@ -112,8 +112,8 @@ var Common = require('../core/Common');
      * @param {constraint[]} constraints
      * @param {number} delta
      */
-    Constraint.solveAll = function(constraints, delta) {
-        var timeScale = Common.clamp(delta / Common._baseDelta, 0, 1);
+    Constraint.solveAll = function(constraints, delta, commonDelta) {
+        var timeScale = Common.clamp(delta / (commonDelta || Common._baseDelta), 0, 1);
 
         // Solve fixed constraints first.
         for (var i = 0; i < constraints.length; i += 1) {
@@ -176,7 +176,10 @@ var Common = require('../core/Common');
             return;
 
         var delta = Vector.sub(pointAWorld, pointBWorld),
-            currentLength = Vector.magnitude(delta);
+            currentLength = Vector.magnitude(delta),
+            currentAngle = Math.atan2(pointBWorld.y - pointAWorld.y, pointBWorld.x - pointAWorld.x);
+
+        // console.log("inital current angle", currentAngle);
 
         // prevent singularity
         if (currentLength < Constraint._minLength) {
@@ -236,6 +239,7 @@ var Common = require('../core/Common');
 
         if (bodyB && !bodyB.isStatic) {
             share = bodyB.inverseMass / massTotal;
+						
 
             // keep track of applied impulses for post solving
             bodyB.constraintImpulse.x += force.x * share;
@@ -255,6 +259,13 @@ var Common = require('../core/Common');
             torque = (Vector.cross(pointB, force) / resistanceTotal) * Constraint._torqueDampen * bodyB.inverseInertia * (1 - constraint.angularStiffness);
             bodyB.constraintImpulse.angle += torque;
             bodyB.angle += torque;
+            var finalAngle = Math.atan2(bodyB.position.y - pointAWorld.y, bodyB.position.x - pointAWorld.x);
+            // console.log("final current angle", finalAngle);
+            // console.log("Constrain impulse", bodyB.constraintImpulse);
+            if (Math.abs(currentAngle - finalAngle) > 0.00000001) {
+
+                // console.log("angle deviation", finalAngle - currentAngle);
+            }
         }
 
     };
@@ -299,9 +310,12 @@ var Common = require('../core/Common');
             }
 
             // dampen the cached impulse for warming next step
-            impulse.angle *= Constraint._warming;
-            impulse.x *= Constraint._warming;
-            impulse.y *= Constraint._warming;
+            // impulse.angle *= Constraint._warming;
+            // impulse.x *= Constraint._warming;
+            // impulse.y *= Constraint._warming;
+            impulse.angle *= 0;
+            impulse.x *= 0;
+            impulse.y *= 0;
         }
     };
 

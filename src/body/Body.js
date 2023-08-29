@@ -748,7 +748,8 @@ var Axes = require('../geometry/Axes');
         deltaTime = (typeof deltaTime !== 'undefined' ? deltaTime : (1000 / 60)) * body.timeScale;
 
         var deltaTimeSquared = deltaTime * deltaTime,
-            correction = Body._timeCorrection ? deltaTime / (body.deltaTime || deltaTime) : 1;
+            // correction = Body._timeCorrection ? deltaTime / (body.deltaTime || deltaTime) : 1;
+            correction = 1;
 
         // from the previous step
         var frictionAir = 1 - body.frictionAir * (deltaTime / Common._baseDelta),
@@ -793,6 +794,7 @@ var Axes = require('../geometry/Axes');
         }
     };
 
+		// Add deltaDivision
     /**
      * Updates properties `body.velocity`, `body.speed`, `body.angularVelocity` and `body.angularSpeed` which are normalised in relation to `Body._baseDelta`.
      * @method updateVelocities
